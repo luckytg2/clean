@@ -1,10 +1,12 @@
 from pyrogram import Client, filters
 from pyrogram.types import Message
-from datetime import datetime, timedelta
-import asyncio
-import os
+import os, asyncio, sys
+from dotenv import load_dotenv
 
-API_ID = int(os.getenv("API_ID")
+load_dotenv()  # Load environment variables from .env file
+
+# ... rest of the code remains the same ...
+API_ID = int(os.getenv("API_ID"))
 API_HASH = os.getenv("API_HASH")
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 
