@@ -1,5 +1,6 @@
 from pyrogram import Client, filters
 from pyrogram.types import Message, ChatMember
+from pyrogram.enums import ChatMembersFilter
 import os
 import asyncio
 import sys
@@ -42,7 +43,7 @@ async def get_admin_ids(chat_id: int) -> set[int]:
         return _admin_cache[chat_id]
     
     admin_ids = set()
-    async for member in app.get_chat_members(chat_id, filter="administrators"):
+    async for member in app.get_chat_members(chat_id, filter=ChatMembersFilter.ADMINISTRATORS):
         if member.user:
             admin_ids.add(member.user.id)
     
@@ -68,7 +69,7 @@ async def clean_messages(_, msg: Message):
     try:
         admins = await get_admin_ids(chat_id)
     except Exception as e:
-        await msg.reply(f"❌ Failed to get admin list: {e}")
+        await msg.reply(f"❌ Failed to get admin list: {str(e)}")
         return
     
     if msg.from_user and msg.from_user.id not in admins:
