@@ -1,5 +1,5 @@
 from pyrogram import Client, filters
-from pyrogram.types import Message
+from pyrogram.types import Message, ChatMember
 import os
 import asyncio
 import sys
@@ -24,7 +24,7 @@ except ValueError:
     print("Error: API_ID must be a valid integer")
     sys.exit(1)
 
-# Initialize Pyrogram client
+# Initialize Pyrogram client with TgCrypto
 app = Client(
     "group_cleaner_bot",
     api_id=API_ID,
@@ -41,8 +41,11 @@ async def get_admin_ids(chat_id: int) -> set[int]:
     if chat_id in _admin_cache:
         return _admin_cache[chat_id]
     
-    admins = await app.get_chat_members(chat_id, filter="administrators")
-    admin_ids = {admin.user.id for admin in admins if admin.user}
+    admin_ids = set()
+    async for member in app.get_chat_members(chat_id, filter="administrators"):
+        if member.user:
+            admin_ids.add(member.user.id)
+    
     _admin_cache[chat_id] = admin_ids
     return admin_ids
 
@@ -62,7 +65,11 @@ def is_admin_message(msg: Message, admin_ids: set[int]) -> bool:
 async def clean_messages(_, msg: Message):
     # Check if the command sender is an admin
     chat_id = msg.chat.id
-    admins = await get_admin_ids(chat_id)
+    try:
+        admins = await get_admin_ids(chat_id)
+    except Exception as e:
+        await msg.reply(f"❌ Failed to get admin list: {e}")
+        return
     
     if msg.from_user and msg.from_user.id not in admins:
         await msg.reply("❌ Only admins can use this command.")
