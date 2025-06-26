@@ -3,17 +3,32 @@ from pyrogram.types import Message
 import os, asyncio, sys
 from dotenv import load_dotenv
 
-load_dotenv()  # Load environment variables from .env file
+load_dotenv()  # Load .env file
 
-# ... rest of the code remains the same ...
-API_ID = int(os.getenv("API_ID"))
+# Check if variables exist
+API_ID = os.getenv("API_ID")
 API_HASH = os.getenv("API_HASH")
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 
-admins_cache = {}
+if not all([API_ID, API_HASH, BOT_TOKEN]):
+    print("❌ Error: Missing environment variables (API_ID, API_HASH, BOT_TOKEN)")
+    sys.exit(1)
 
-app = Client("cleaner_bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN, in_memory=True)
+try:
+    API_ID = int(API_ID)  # Convert API_ID to integer
+except ValueError:
+    print("❌ Error: API_ID must be a number")
+    sys.exit(1)
 
+app = Client(
+    "cleaner_bot",
+    api_id=API_ID,
+    api_hash=API_HASH,
+    bot_token=BOT_TOKEN,
+    in_memory=True
+)
+
+# ... rest of your code ...
 async def get_admin_ids(chat_id):
     if chat_id in admins_cache:
         return admins_cache[chat_id]
