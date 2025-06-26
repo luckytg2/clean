@@ -78,8 +78,8 @@ async def clean_messages(_, msg: Message):
     kept_count = 0
     errors = 0
     
-    # Use iter_history instead of get_chat_history
-    async for message in app.iter_history(chat_id):
+    # CORRECT METHOD: Use get_chat_history (works for bots in groups where they're admin)
+    async for message in app.get_chat_history(chat_id):
         if message.id == status_msg.id:
             continue
         
@@ -91,7 +91,8 @@ async def clean_messages(_, msg: Message):
             await message.delete()
             deleted_count += 1
             await asyncio.sleep(0.5)  # Flood control
-        except Exception:
+        except Exception as e:
+            print(f"Error deleting message: {e}")
             errors += 1
             continue
     
